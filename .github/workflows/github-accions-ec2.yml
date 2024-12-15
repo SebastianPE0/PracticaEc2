@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - test
+      - '!test2'
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: docker build -t sebastianperez02/appdec2 .
+
+      - name: Push Docker image to DockerHub
+        run: docker push sebastianperez02/appdec2:latest
+
+  deploy-to-ec2:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        instance: ${{ fromJson(github.ref_name == 'main' && '["HOST_DN1S", "HOST_DNS2"]' || '["HOST_DNS3", "HOST_DNS4"]') }}
+    
+    steps:
+      - name: Trigger redeploy on EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets[matrix.instance] }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            docker pull sebastianperez02/appdec2:latest 
+            docker stop my_container || true 
+            docker rm my_container || true 
+            # Opción 1: Usar la red del host
+            docker run -d --name my_container --network host sebastianperez02/appdec2:latest
+
+            echo "Desplegando en ${{ matrix.instance }} con la rama ${{ github.ref_name }}"
