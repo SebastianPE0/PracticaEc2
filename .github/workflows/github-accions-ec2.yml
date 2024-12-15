@@ -44,7 +44,8 @@ jobs:
             docker pull sebastianperez02/appdec2:latest 
             docker stop my_container || true 
             docker rm my_container || true 
+            docker run -d --name containertest -p 80:80 sebastianperez02/appdec2:latest
             # Opción 1: Usar la red del host
-            docker run -d --name my_container --network host sebastianperez02/appdec2:latest
-
+            # docker run -d --name my_container --network host sebastianperez02/appdec2:latest
+            
             echo "Desplegando en ${{ matrix.instance }} con la rama ${{ github.ref_name }}"
