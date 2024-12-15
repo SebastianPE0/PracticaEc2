@@ -41,10 +41,24 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
-            docker pull sebastianperez02/appdec2:latest 
-            docker stop my_container || true 
-            docker rm my_container || true 
-            # Opción 1: Usar la red del host
-            docker run -d --name my_container --network host sebastianperez02/appdec2:latest
+            # Actualizar paquetes y preparar el entorno para Docker
+            sudo apt update -y
+            sudo apt install -y docker.io
 
+            # Iniciar y habilitar Docker para que se ejecute al iniciar el sistema
+            sudo systemctl start docker
+            sudo systemctl enable docker
+
+            # Agregar el usuario al grupo docker (esto evita tener que usar sudo para ejecutar docker)
+            sudo usermod -aG docker $USER
+
+            # Configurar permisos para el socket Docker
+            sudo chmod 666 /var/run/docker.sock
+            docker pull sebastianperez02/appdec2:latest 
+            docker stop containertest || true 
+            docker rm containertest || true 
+            docker run -d --name containertest -p 80:80 sebastianperez02/appdec2:latest
+            # Opción 1: Usar la red del host
+            # docker run -d --name my_container --network host sebastianperez02/appdec2:latest
+            
             echo "Desplegando en ${{ matrix.instance }} con la rama ${{ github.ref_name }}"
