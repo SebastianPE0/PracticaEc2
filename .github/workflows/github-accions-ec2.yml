@@ -55,8 +55,8 @@ jobs:
             # Configurar permisos para el socket Docker
             sudo chmod 666 /var/run/docker.sock
             docker pull sebastianperez02/appdec2:latest 
-            docker stop my_container || true 
-            docker rm my_container || true 
+            docker stop containertest || true 
+            docker rm containertest || true 
             docker run -d --name containertest -p 80:80 sebastianperez02/appdec2:latest
             # Opción 1: Usar la red del host
             # docker run -d --name my_container --network host sebastianperez02/appdec2:latest
