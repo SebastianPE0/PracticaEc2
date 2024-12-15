@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        instance: ${{ fromJson(github.ref_name == 'main' && '["HOST_DN1S", "HOST_DNS2"]' || '["HOST_DNS3", "HOST_DNS4"]') }}
+        instance: ${{ fromJson(github.ref_name == 'main' && '["HOST_DNS1", "HOST_DNS2"]' || '["HOST_DNS3", "HOST_DNS4"]') }}
     
     steps:
       - name: Trigger redeploy on EC2
